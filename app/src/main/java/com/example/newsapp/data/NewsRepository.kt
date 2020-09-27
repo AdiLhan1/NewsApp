@@ -1,23 +1,29 @@
 package com.example.newsapp.data
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.newsapp.api.NewsApi
-import com.example.newsapp.api.RetrofitClient
+import com.example.newsapp.data.api.NewsApi
+import com.example.newsapp.data.api.RetrofitClient
 import com.example.newsapp.models.News
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class NewsRepository() {
+class NewsRepository {
 
     companion object {
         private lateinit var newsApi: NewsApi
-        fun fetchNewsListData(country: String, apiKey: String): LiveData<News> {
+        fun fetchNewsListData(
+            country: String,
+            apiKey: String,
+            page: Int,
+            pageSize: Int
+        ): LiveData<News> {
             newsApi = RetrofitClient.create()
             val data = MutableLiveData<News>()
 
-            newsApi.getNews(country, apiKey).enqueue(object :
+            newsApi.getNews(country, apiKey, page, pageSize).enqueue(object :
                 Callback<News> {
                 override fun onFailure(call: Call<News>, t: Throwable) {
                     data.value = null
@@ -28,25 +34,10 @@ class NewsRepository() {
                     response: Response<News>
                 ) {
                     data.value = response.body()
+                    Log.e("TAG", "onResponse: ${response.body()}")
                 }
             })
             return data
         }
-
     }
-
-//    override fun getNews(
-//        country: String, apiKey: String, callback: INewsApiClient.NewsCallback
-//    ) {
-//        iNewsApiClient.getNews(country, apiKey, object : INewsApiClient.NewsCallback {
-//            override fun onSuccess(result: News?) {
-//                callback.onSuccess(result)
-//            }
-//
-//            override fun onFailure(e: Exception?) {
-//                callback.onFailure(e)
-//            }
-//
-//        })
-//    }
 }

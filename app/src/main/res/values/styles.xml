@@ -8,9 +8,69 @@
         <item name="android:statusBarColor" tools:targetApi="lollipop">@color/white</item>
         <item name="android:windowFullscreen">true</item>
     </style>
+
     <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/darker_gray</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:actionMenuTextColor">@android:color/white</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+    </style>
+
+    <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/white</item>
+    </style>
+
+    <style name="Txt">
+        <item name="android:text">Top headlines</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="progressBar_small">
+        <item name="android:textSize">10dp</item>
+    </style>
+
+    <style name="TxtView_Style">
+        <item name="android:text">Author</item>
+        <item name="android:textColor">#fff</item>
+    </style>
+
+    <style name="TxtView_Style_Date">
+        <item name="android:text">2020-09-26</item>
+        <item name="android:textColor">#606060</item>
+    </style>
+
+    <style name="TxtView_Style_Title">
+        <item name="android:text">title</item>
+        <item name="android:textColor">#606060</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <style name="TxtView_Style_Source">
+        <item name="android:text">source</item>
+        <item name="android:textColor">@color/colorTextTitle</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="TxtView_Style_Time">
+        <item name="android:text">time</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
     </style>
 </resources>

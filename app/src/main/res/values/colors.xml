@@ -9,5 +9,8 @@
     <color name="red">#C60D0D</color>
     <color name="gray">#aaa</color>
     <color name="lightGray">#F6F5F5</color>
+    <color name="colorBackground">#f9f9fa</color>
+    <color name="colorTextSubtitle">#4e4e4e</color>
+    <color name="colorTextTitle">#262626</color>
 
 </resources>

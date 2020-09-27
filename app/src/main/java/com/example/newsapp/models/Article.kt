@@ -1,36 +1,48 @@
 package com.example.newsapp.models
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.Serializable
 
-@Serializable
+@Entity(tableName = "article")
 class Article : java.io.Serializable {
-    @SerializedName("source")
-    @Expose
-    val source: Source? = null
-
+    @ColumnInfo
     @SerializedName("author")
     @Expose
-    val author: String? = null
+    var author: String? = null
 
+    @PrimaryKey(autoGenerate = true)
+    var id: Int? = null
+
+    @ColumnInfo
     @SerializedName("title")
     @Expose
-    val title: String? = null
+    var title: String? = null
 
+    @ColumnInfo
     @SerializedName("description")
     @Expose
-    val description: String? = null
+    var description: String? = null
 
+    @ColumnInfo
     @SerializedName("url")
     @Expose
-    val url: String? = null
+    var url: String? = null
 
+    @ColumnInfo
     @SerializedName("urlToImage")
     @Expose
-    val urlToImage: String? = null
+    var urlToImage: String? = null
 
+    @ColumnInfo
     @SerializedName("publishedAt")
     @Expose
-    val publishedAt: String? = null
+    var publishedAt: String? = null
+
+    @ColumnInfo
+    @SerializedName("content")
+    @Expose
+    var content: String? = null
 }

@@ -1,20 +1,27 @@
 package com.example.newsapp.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.example.newsapp.data.typeconverter.ArticleModelTypeConverter
 import com.google.gson.annotations.Expose
-
 import com.google.gson.annotations.SerializedName
 
-
+@Entity(tableName = "news")
+@TypeConverters(ArticleModelTypeConverter::class)
 class News {
+    @PrimaryKey(autoGenerate = true)
+    var id: Int? = null
+
     @SerializedName("status")
     @Expose
-    private val status: String? = null
+    var status: String? = null
 
     @SerializedName("totalResult")
     @Expose
-    private val totalResult = 0
+    var totalResult = 0
 
     @SerializedName("articles")
     @Expose
-    public val articles: List<Article>? = null
+    var articles: List<Article>? = null
 }

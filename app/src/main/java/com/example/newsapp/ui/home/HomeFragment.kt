@@ -1,97 +1,169 @@
 package com.example.newsapp.ui.home
 
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.NavHostFragment
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.newsapp.R
 import com.example.newsapp.adapter.NewsAdapter
-import com.example.newsapp.data.`interface`.SendDataListener
+import com.example.newsapp.data.intrface.SendDataListener
 import com.example.newsapp.models.Article
 import com.example.newsapp.models.News
-import com.google.android.material.tabs.TabLayout
+import com.example.newsapp.utils.InternetHelper
+import com.example.newsapp.utils.UiHelper
 import kotlinx.android.synthetic.main.home_fragment.*
 
 
 class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
+    private lateinit var comm: SendDataListener
     private lateinit var viewModel: HomeViewModel
     private lateinit var adapter: NewsAdapter
-    lateinit var comm: SendDataListener
+    private var country: String = "ru"
+    private var apiKey: String = "e9f0e3118ad44e7c985b758271b4ebdb"
 
+    //    private val networkMonitor = NetworkMonitorUtil(requireActivity())
+    var isLoading = false
+    var page: Int = 1
+    private var limit: Int = 10
+    private var pos: Int = 1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         comm = activity as SendDataListener
-
         return inflater.inflate(R.layout.home_fragment, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
-        initTab()
         initRecycler()
         swiperefresh.setOnRefreshListener {
-            swiperefresh.isRefreshing = false
+            fetchNewData()
         }
+        fetchNews()
+//        fetchNewData()
+//        getDataFromDatabase()
     }
 
-    private fun initTab() {
-        tabLayout.addTab(tabLayout.newTab().setText("Русский"))
-        tabLayout.addTab(tabLayout.newTab().setText("English"))
-        tabLayout.addTab(tabLayout.newTab().setText("日本語"))
-        tabLayout.addTab(tabLayout.newTab().setText("한국어"))
-        tabLayout.addTab(tabLayout.newTab().setText("Türk"))
+    private fun updateDatabaseNews(model: News?) {
+        model?.let { viewModel.insertNewsData(it) }
+    }
 
-        val onTabSelectedListener: TabLayout.OnTabSelectedListener = object :
-            TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                when (tabLayout.selectedTabPosition) {
-                    0 -> fetchNewsList("ru")
-                    1 -> fetchNewsList("us")
-                    2 -> fetchNewsList("jp")
-                    3 -> fetchNewsList("kr")
-                    4 -> fetchNewsList("tr")
+    private fun fetchNews() {
+        swiperefresh.isRefreshing = true
+        if (InternetHelper().checkInternetConnection(requireActivity())) {
+            val data = viewModel.getNewsListData(country, apiKey, page, limit)
+            data.observe(requireActivity(), Observer<News> {
+                val model: News? = data.value
+                when {
+                    model != null -> {
+                        progress_bar.visibility = View.GONE
+                        swiperefresh.isRefreshing = false
+                        Log.e("internet", "fetchNews: 1")
+                        viewModel.deleteAllNews()
+                        updateDatabaseNews(model)
+                        updateAdapterData(model)
+                    }
                 }
+            })
+        } else {
+            Log.e("internet", "fetchNews: 2")
+            val model = viewModel.getNewsFromDB()
+            if (model != null && !model.articles.isNullOrEmpty()) {
+                progress_bar.visibility = View.GONE
+                swiperefresh.isRefreshing = false
+                isLoading = false
+                Log.e(
+                    "database",
+                    "getDataFromDatabase: getNewsFromDb model: ${model.articles.toString()}"
+                )
+                updateAdapterData(model)
+                fetchNewData()
             }
-
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-            override fun onTabReselected(tab: TabLayout.Tab) {}
+            progress_bar.visibility = View.GONE
+            swiperefresh.isRefreshing = false
+            isLoading = false
+            UiHelper().showToast(requireContext(), "No internet connection")
         }
-        onTabSelectedListener.onTabSelected(tabLayout.getTabAt(tabLayout.selectedTabPosition))
-        tabLayout.addOnTabSelectedListener(onTabSelectedListener)
-
     }
 
     private fun initRecycler() {
+        recyclerview.itemAnimator = DefaultItemAnimator()
+        recyclerview.isNestedScrollingEnabled = false
+        val layoutManager = LinearLayoutManager(activity)
+        recyclerview.layoutManager = layoutManager
         adapter = NewsAdapter(this@HomeFragment)
         recyclerview.adapter = adapter
-        recyclerview.addItemDecoration(object : DividerItemDecoration(context, VERTICAL) {})
+        recyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy > 0) {
+                    val visibleItemCount = layoutManager.childCount
+                    val pastVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
+                    val total = adapter.itemCount
+                    if (!isLoading) {
+
+                        if ((visibleItemCount + pastVisibleItem) >= total) {
+                            val countDownTimer: CountDownTimer =
+                                (object : CountDownTimer(2000, 1000) {
+                                    override fun onFinish() {
+                                        if (swiperefresh != null) {
+                                            swiperefresh.isRefreshing = false
+                                        }
+                                        page += 1
+                                        fetchNewData()
+                                    }
+
+                                    override fun onTick(p0: Long) {
+                                        if (progress_bar != null) {
+                                            progress_bar.visibility = View.VISIBLE
+                                        }
+                                    }
+                                })
+                            countDownTimer.start()
+                        }
+                    }
+
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+
     }
 
-    private fun clickItem(item: Article) {
-        Toast.makeText(context, item.toString(), Toast.LENGTH_LONG).show()
-        val navHostFragment =
-            activity?.supportFragmentManager?.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
-        navController.navigate(R.id.action_homeFragment_to_detailFragment)
-    }
-
-    private fun fetchNewsList(country: String) {
-        val data = viewModel.getNewsListData(country, "3fc691db3d6342bca61f7d85afa061e0")
+    private fun fetchNewData() {
+        if (swiperefresh != null) {
+            swiperefresh.isRefreshing = true
+        }
+        isLoading = true
+        val data =
+            viewModel.getNewsListData(country, apiKey, page, limit)
         data.observe(viewLifecycleOwner, Observer<News> {
             val model: News? = data.value
             when {
-                model != null -> {
-                    updateAdapterData(model)
+                data.value != null -> {
+                    if (model != null) {
+                        progress_bar.visibility = View.GONE
+                        swiperefresh.isRefreshing = false
+                        isLoading = false
+                        viewModel.deleteAllNews()
+                        updateDatabaseNews(model)
+                        updateAdapterData(model)
+                    }
+                }
+                else -> {
+                    progress_bar.visibility = View.GONE
+                    swiperefresh.isRefreshing = false
+                    isLoading = false
                 }
             }
         })
@@ -102,10 +174,10 @@ class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
         adapter.updateData(data)
     }
 
-    override fun onItemClick(model: Article) {
+    override fun onItemClick(model: Article, adapterPosition: Int) {
+        pos = adapterPosition
         comm.passDataCom(
             model
         )
     }
-
 }

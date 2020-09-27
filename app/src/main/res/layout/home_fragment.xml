@@ -6,42 +6,62 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/tab_layout_background"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tabBackground="@drawable/tab_layout_selector"
-        app:tabIndicatorHeight="0dp"
-        app:tabMode="scrollable"
-        app:tabPaddingEnd="16dp"
-        app:tabPaddingStart="16dp"
-        app:tabRippleColor="@null"
-        app:tabSelectedTextColor="@color/black"
-        app:tabTextAppearance="@style/TabTextAppearance" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="5dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayout"
-        tools:listitem="@layout/news_list_item" />
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swiperefresh"
-        android:layout_width="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="200dp"
-        android:layout_height="500dp">
-
-        <ListView
-            android:id="@+id/lv_lisView"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            <LinearLayout
+                android:id="@+id/l"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/swiperefresh"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="50dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="40dp"
+                        android:nestedScrollingEnabled="false"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:ignore="UnusedAttribute"
+                        tools:listitem="@layout/news_list_item" />
+
+
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    style="@style/Widget.AppCompat.ProgressBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="50dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

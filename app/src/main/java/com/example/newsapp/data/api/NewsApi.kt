@@ -1,4 +1,4 @@
-package com.example.newsapp.api
+package com.example.newsapp.data.api
 
 import com.example.newsapp.models.News
 import retrofit2.Call
@@ -9,6 +9,8 @@ interface NewsApi {
     @GET("top-headlines")
     fun getNews(
         @Query("country") country: String,
-        @Query("apiKey") apikey: String
+        @Query("apiKey") apikey: String,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int
     ): Call<News>
 }

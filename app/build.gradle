@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
@@ -33,6 +34,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    kapt "android.arch.lifecycle:compiler:1.1.1"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
@@ -66,6 +68,17 @@ dependencies {
     //swipe refresh
     "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0" // JVM dependency
-
-
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
+    //Glide
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    //Room
+    def roomVersion = "2.2.5"
+    //noinspection GradleDependency
+    implementation "androidx.room:room-runtime:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 }

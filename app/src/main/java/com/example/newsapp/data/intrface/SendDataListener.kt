@@ -1,4 +1,4 @@
-package com.example.newsapp.data.`interface`
+package com.example.newsapp.data.intrface
 
 import com.example.newsapp.models.Article
 

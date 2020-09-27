@@ -1,4 +1,4 @@
-package com.example.newsapp.api
+package com.example.newsapp.data.api
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -10,7 +10,7 @@ class RetrofitClient {
 
     companion object {
 
-        private val BASE_URL = "http://newsapi.org/v2/"
+        private const val BASE_URL = "http://newsapi.org/v2/"
 
         fun create(): NewsApi {
             val okHttpClient = OkHttpClient().newBuilder()
