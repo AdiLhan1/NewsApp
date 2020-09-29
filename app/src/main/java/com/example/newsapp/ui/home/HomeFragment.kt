@@ -1,7 +1,6 @@
 package com.example.newsapp.ui.home
 
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -31,8 +30,10 @@ class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
 
     //    private val networkMonitor = NetworkMonitorUtil(requireActivity())
     var isLoading = false
+    var isFirstLoading = true
     var page: Int = 1
     private var limit: Int = 10
+    private var pageSize: Int = 0
     private var pos: Int = 1
 
     override fun onCreateView(
@@ -62,20 +63,32 @@ class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
     private fun fetchNews() {
         swiperefresh.isRefreshing = true
         if (InternetHelper().checkInternetConnection(requireActivity())) {
-            val data = viewModel.getNewsListData(country, apiKey, page, limit)
-            data.observe(requireActivity(), Observer<News> {
-                val model: News? = data.value
-                when {
-                    model != null -> {
-                        progress_bar.visibility = View.GONE
-                        swiperefresh.isRefreshing = false
-                        Log.e("internet", "fetchNews: 1")
-                        viewModel.deleteAllNews()
-                        updateDatabaseNews(model)
-                        updateAdapterData(model)
+            if (isFirstLoading) {
+                val data = viewModel.getNewsListData(country, apiKey, page, limit)
+                data.observe(requireActivity(), Observer<News> {
+                    val model: News? = data.value
+                    if (it.articles!!.size == null) {
+                        pageSize = 0
                     }
-                }
-            })
+                    when {
+                        model != null -> {
+                            pageSize = it.articles!!.size
+                            progress_bar.visibility = View.GONE
+                            swiperefresh.isRefreshing = false
+                            isFirstLoading = false
+                            Log.e("internet", "fetchNews: 1")
+                            viewModel.deleteAllNews()
+                            updateDatabaseNews(model)
+                            updateAdapterData(model)
+                        }
+                        else -> {
+                            Log.e("TAG", "model is null")
+                        }
+                    }
+                })
+            } else {
+                Log.e("TAG", "fetchNewData: is not firest getting")
+            }
         } else {
             Log.e("internet", "fetchNews: 2")
             val model = viewModel.getNewsFromDB()
@@ -88,7 +101,7 @@ class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
                     "getDataFromDatabase: getNewsFromDb model: ${model.articles.toString()}"
                 )
                 updateAdapterData(model)
-                fetchNewData()
+//                fetchNewData()
             }
             progress_bar.visibility = View.GONE
             swiperefresh.isRefreshing = false
@@ -111,25 +124,18 @@ class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
                     val pastVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
                     val total = adapter.itemCount
                     if (!isLoading) {
-
                         if ((visibleItemCount + pastVisibleItem) >= total) {
-                            val countDownTimer: CountDownTimer =
-                                (object : CountDownTimer(2000, 1000) {
-                                    override fun onFinish() {
-                                        if (swiperefresh != null) {
-                                            swiperefresh.isRefreshing = false
-                                        }
-                                        page += 1
-                                        fetchNewData()
-                                    }
-
-                                    override fun onTick(p0: Long) {
-                                        if (progress_bar != null) {
-                                            progress_bar.visibility = View.VISIBLE
-                                        }
-                                    }
-                                })
-                            countDownTimer.start()
+                            if (swiperefresh != null) {
+                                swiperefresh.isRefreshing = false
+                            }
+                            progress_bar.visibility = View.VISIBLE
+                            if (pageSize > 9) {
+                                page += 1
+                                fetchNewData()
+                            } else {
+                                UiHelper().showToast(activity!!, "Все данные загрузились")
+                                progress_bar.visibility = View.GONE
+                            }
                         }
                     }
 
@@ -145,29 +151,41 @@ class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
             swiperefresh.isRefreshing = true
         }
         isLoading = true
-        val data =
-            viewModel.getNewsListData(country, apiKey, page, limit)
-        data.observe(viewLifecycleOwner, Observer<News> {
-            val model: News? = data.value
-            when {
-                data.value != null -> {
-                    if (model != null) {
+        isFirstLoading = true
+        if (isFirstLoading) {
+            val data =
+                viewModel.getNewsListData(country, apiKey, page, limit)
+            data.observe(viewLifecycleOwner, Observer<News> {
+                val model: News? = data.value
+                if (model == null) {
+                    pageSize = 0
+                }
+                when {
+                    data.value != null -> {
+                        if (model != null) {
+                            pageSize = it.articles!!.size
+                            progress_bar.visibility = View.GONE
+                            swiperefresh.isRefreshing = false
+                            isLoading = false
+                            isFirstLoading = false
+                            viewModel.deleteAllNews()
+                            updateDatabaseNews(model)
+                            updateAdapterData(model)
+                        }
+                    }
+                    else -> {
                         progress_bar.visibility = View.GONE
                         swiperefresh.isRefreshing = false
                         isLoading = false
-                        viewModel.deleteAllNews()
-                        updateDatabaseNews(model)
-                        updateAdapterData(model)
+                        isFirstLoading = true
                     }
                 }
-                else -> {
-                    progress_bar.visibility = View.GONE
-                    swiperefresh.isRefreshing = false
-                    isLoading = false
-                }
-            }
-        })
+            })
+        } else {
+            Log.e("TAG", "fetchNewData: is not firest getting")
+        }
     }
+
 
     private fun updateAdapterData(model: News) {
         val data = model.articles
@@ -179,5 +197,6 @@ class HomeFragment : Fragment(), NewsAdapter.OnItemClickListener {
         comm.passDataCom(
             model
         )
+        isFirstLoading = true
     }
 }

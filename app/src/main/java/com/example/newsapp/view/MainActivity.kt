@@ -1,5 +1,6 @@
 package com.example.newsapp.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity(), SendDataListener {
     private lateinit var navController: NavController
     lateinit var drawerLayout: DrawerLayout
 
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -34,9 +36,8 @@ class MainActivity : AppCompatActivity(), SendDataListener {
 //        NewsDatabase.get(application)
 
         drawerLayout = findViewById(R.id.drawer_layout)
-
-        // Set the toolbar
         setSupportActionBar(toolbar)
+        // Set the toolbar
         initDrawer()
     }
 
